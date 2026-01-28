@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Создание предложения - Заявка #{{ shipment.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <!-- Хлебные крошки -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'shipment_list' %}">Заявки</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'shipment_detail' shipment.id %}">Заявка #{{ shipment.id }}</a></li>
+                    <li class="breadcrumb-item active">Создание предложения</li>
+                </ol>
+            </nav>
+
+            <!-- Заголовок -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="h3 mb-3">Создание предложения</h1>
+                    <p class="text-muted">
+                        Вы создаете предложение для заявки: <strong>{{ shipment.title }}</strong>
+                    </p>
+                    
+                    <!-- Информация о заявке -->
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Информация о заявке:</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Маршрут:</strong> {{ shipment.departure_city }} → {{ shipment.arrival_city }}</p>
+                                <p><strong>Груз:</strong> {{ shipment.cargo_type }} ({{ shipment.weight }} кг)</p>
+                                <p><strong>Размеры:</strong> {{ shipment.length }}×{{ shipment.width }}×{{ shipment.height }} см</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Даты:</strong> {{ shipment.departure_date|date:"d.m.Y" }} - {{ shipment.arrival_date|date:"d.m.Y" }}</p>
+                                <p><strong>Бюджет:</strong> {{ shipment.estimated_price }} {{ shipment.currency }}</p>
+                                <p><strong>Статус:</strong> {{ shipment.get_status_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Форма создания предложения -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0">Детали предложения</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <!-- Цена -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.price.id_for_label }}" class="form-label">
+                                    {{ form.price.label }} *
+                                </label>
+                                <div class="input-group">
+                                    {{ form.price }}
+                                    <span class="input-group-text">{{ form.currency.value }}</span>
+                                </div>
+                                {% if form.price.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.price.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Рекомендуемая цена: {{ shipment.estimated_price }} {{ shipment.currency }}
+                                </small>
+                            </div>
+                            
+                            <!-- Валюта -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.currency.id_for_label }}" class="form-label">
+                                    {{ form.currency.label }} *
+                                </label>
+                                {{ form.currency }}
+                                {% if form.currency.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.currency.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <!-- Дата отправления -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.departure_date.id_for_label }}" class="form-label">
+                                    {{ form.departure_date.label }} *
+                                </label>
+                                {{ form.departure_date }}
+                                {% if form.departure_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.departure_date.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Желаемая дата отправителя: {{ shipment.departure_date|date:"d.m.Y" }}
+                                </small>
+                            </div>
+                            
+                            <!-- Дата прибытия -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.arrival_date.id_for_label }}" class="form-label">
+                                    {{ form.arrival_date.label }} *
+                                </label>
+                                {{ form.arrival_date }}
+                                {% if form.arrival_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.arrival_date.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Желаемая дата получателя: {{ shipment.arrival_date|date:"d.m.Y" }}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Заметки -->
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">
+                                {{ form.notes.label }}
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.notes.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Опишите ваши условия, возможности, дополнительные услуги и т.д.
+                            </small>
+                        </div>
+                        
+                        <!-- Кнопки -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'shipment_detail' shipment.id %}" class="btn btn-outline-secondary">
+                                ← Назад к заявке
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send-check"></i> Отправить предложение
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Важная информация -->
+            <div class="card mt-4 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="h6 mb-0"><i class="bi bi-exclamation-triangle"></i> Важная информация</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>После отправки предложения вы не сможете его изменить</li>
+                        <li>Вы можете отозвать предложение до тех пор, пока оно не принято</li>
+                        <li>К одной заявке можно отправить только одно активное предложение</li>
+                        <li>После принятия вашего предложения заявка перейдет в статус "В работе"</li>
+                        <li>Вы будете уведомлены по email о решении грузовладельца</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .card {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+    }
+</style>
+{% endblock %}

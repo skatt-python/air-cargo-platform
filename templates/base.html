@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AirCargo Platform - Платформа для грузовых авиаперевозок{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            padding-top: 56px;
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+        }
+
+        .footer {
+            background-color: #343a40;
+            color: white;
+            margin-top: 3rem;
+            padding: 2rem 0;
+        }
+
+        .card {
+            transition: transform 0.2s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .badge-pill {
+            border-radius: 10rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .messages-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1050;
+            width: 350px;
+        }
+
+        .alert {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Навигационная панель -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <!-- Логотип и название -->
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="bi bi-airplane-engines"></i> AirCargo Platform
+            </a>
+
+            <!-- Кнопка для мобильных устройств -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Содержимое навигации -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Основное меню -->
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'shipment_list' %}active{% endif %}"
+                           href="{% url 'shipment_list' %}">
+                            <i class="bi bi-list-task"></i> Заявки
+                        </a>
+                    </li>
+
+                    <!-- Создание предложения (только для агентов) -->
+                    {% if user.is_authenticated and user.userprofile.is_carrier_agent %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'create_bid' %}active{% endif %}"
+                           href="{% url 'shipment_list' %}?status=active">
+                            <i class="bi bi-plus-circle"></i> Найти заявку
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- Создание заявки (только для грузовладельцев) -->
+                    {% if user.is_authenticated and user.userprofile.is_cargo_owner %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'shipment_create' %}active{% endif %}"
+                           href="{% url 'shipment_create' %}">
+                            <i class="bi bi-plus-square"></i> Создать заявку
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- Dashboard -->
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                           href="{% url 'dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- Ссылка в админку (только для персонала) -->
+                    {% if user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">
+                            <i class="bi bi-gear"></i> Админка
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Правая часть навигации -->
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <!-- Уведомления -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown"
+                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bell"></i>
+                                {% if user.notifications.unread.count %}
+                                    <span class="badge bg-danger rounded-pill">{{ user.notifications.unread.count }}</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                                <li><h6 class="dropdown-header">Уведомления</h6></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-check-circle text-success"></i> Новое предложение к заявке #123</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle text-info"></i> Статус заявки #456 изменен</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-envelope"></i> Все уведомления</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Профиль пользователя -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                               id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="user-avatar me-2">
+                                    {{ user.username|slice:":1"|upper }}
+                                </div>
+                                <span>{{ user.get_full_name|default:user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li>
+                                    <span class="dropdown-item-text">
+                                        <small class="text-muted">Роль:</small><br>
+                                        {% if user.userprofile.is_cargo_owner %}
+                                            <span class="badge bg-primary">Грузовладелец</span>
+                                        {% endif %}
+                                        {% if user.userprofile.is_carrier_agent %}
+                                            <span class="badge bg-success">Агент перевозчика</span>
+                                        {% endif %}
+                                    </span>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="bi bi-person-circle"></i> Мой профиль</a></li>
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="bi bi-briefcase"></i> Мои заявки
+                                        <span class="badge bg-secondary float-end">{{ user.shipments.count }}</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="bi bi-megaphone"></i> Мои предложения
+                                        <span class="badge bg-secondary float-end">{{ user.submitted_bids.count }}</span>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Настройки</a></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Выйти</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Кнопки входа и регистрации -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="bi bi-box-arrow-in-right"></i> Войти
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light ms-2" href="{% url 'register' %}">
+                                <i class="bi bi-person-plus"></i> Регистрация
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Контейнер для сообщений -->
+    <div class="messages-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Основное содержимое -->
+    <main class="container py-4">
+        {% block content %}
+        <!-- Содержимое страниц будет здесь -->
+        {% endblock %}
+    </main>
+
+    <!-- Подвал -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>AirCargo Platform</h5>
+                    <p>Платформа для организации грузовых авиаперевозок. Соединяем грузовладельцев и перевозчиков.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Контакты</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope"></i> info@aircargo-platform.com</li>
+                        <li><i class="bi bi-telephone"></i> +7 (999) 123-45-67</li>
+                        <li><i class="bi bi-geo-alt"></i> Москва, Россия</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Быстрые ссылки</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'shipment_list' %}" class="text-white text-decoration-none">Все заявки</a></li>
+                        <li><a href="{% url 'dashboard' %}" class="text-white text-decoration-none">Dashboard</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Помощь</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">О проекте</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="bg-light">
+            <div class="row">
+                <div class="col-md-6">
+                    <span>&copy; 2024 AirCargo Platform. Все права защищены.</span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-white text-decoration-none me-3">Политика конфиденциальности</a>
+                    <a href="#" class="text-white text-decoration-none">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS с Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery (опционально, если нужен) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Кастомный JS -->
+    <script>
+        // Автоматическое скрытие сообщений через 5 секунд
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+
+        // Инициализация всех всплывающих подсказок
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Установка активного пункта меню
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUrl = window.location.pathname;
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === currentUrl) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

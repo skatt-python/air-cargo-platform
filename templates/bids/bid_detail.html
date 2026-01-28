@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Предложение #{{ bid.id }} - AirCargo Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <!-- Хлебные крошки -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'shipment_list' %}">Заявки</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'shipment_detail' bid.shipment.id %}">Заявка #{{ bid.shipment.id }}</a></li>
+                    <li class="breadcrumb-item active">Предложение #{{ bid.id }}</li>
+                </ol>
+            </nav>
+
+            <!-- Заголовок и статус -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h1 class="h3 mb-2">Предложение #{{ bid.id }}</h1>
+                            <p class="text-muted mb-0">
+                                Для заявки: <a href="{% url 'shipment_detail' bid.shipment.id %}">#{{ bid.shipment.id }} {{ bid.shipment.title }}</a>
+                            </p>
+                        </div>
+                        <div>
+                            <span class="badge bg-{% if bid.status == 'accepted' %}success{% elif bid.status == 'pending' %}warning{% elif bid.status == 'rejected' %}danger{% else %}secondary{% endif %} fs-6">
+                                {{ bid.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Основная информация -->
+                <div class="col-md-8">
+                    <!-- Информация о предложении -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h2 class="h5 mb-0">Детали предложения</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-muted">Цена</h6>
+                                    <p class="h4 text-primary">{{ bid.price }} {{ bid.currency }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-muted">Даты перевозки</h6>
+                                    <p class="mb-1"><strong>Отправление:</strong> {{ bid.departure_date|date:"d.m.Y" }}</p>
+                                    <p class="mb-0"><strong>Прибытие:</strong> {{ bid.arrival_date|date:"d.m.Y" }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Заметки -->
+                            {% if bid.notes %}
+                            <div class="mt-3">
+                                <h6 class="text-muted">Дополнительные заметки</h6>
+                                <div class="alert alert-light border">
+                                    {{ bid.notes|linebreaks }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Метки времени -->
+                            <div class="row mt-4 pt-3 border-top">
+                                <div class="col-md-6">
+                                    <small class="text-muted">Создано: {{ bid.created_at|date:"d.m.Y H:i" }}</small>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <small class="text-muted">Обновлено: {{ bid.updated_at|date:"d.m.Y H:i" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Информация о заявке -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h2 class="h5 mb-0">Информация о заявке</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Маршрут</h6>
+                                    <p class="h5">
+                                        {{ bid.shipment.departure_city }} 
+                                        <i class="bi bi-arrow-right mx-2"></i>
+                                        {{ bid.shipment.arrival_city }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Груз</h6>
+                                    <p class="mb-1"><strong>Тип:</strong> {{ bid.shipment.get_cargo_type_display }}</p>
+                                    <p class="mb-1"><strong>Вес:</strong> {{ bid.shipment.weight }} кг</p>
+                                    <p class="mb-0"><strong>Размеры:</strong> {{ bid.shipment.length }}×{{ bid.shipment.width }}×{{ bid.shipment.height }} см</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Описание -->
+                            {% if bid.shipment.description %}
+                            <div class="mt-3">
+                                <h6 class="text-muted">Описание</h6>
+                                <p>{{ bid.shipment.description }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Боковая панель -->
+                <div class="col-md-4">
+                    <!-- Информация об участниках -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h2 class="h5 mb-0">Участники</h2>
+                        </div>
+                        <div class="card-body">
+                            <!-- Грузовладелец -->
+                            <div class="mb-3">
+                                <h6 class="text-muted">Грузовладелец</h6>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <p class="mb-0"><strong>{{ bid.shipment.owner.get_full_name|default:bid.shipment.owner.username }}</strong></p>
+                                        <small class="text-muted">Создал заявку {{ bid.shipment.created_at|date:"d.m.Y" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Агент перевозчика -->
+                            <div>
+                                <h6 class="text-muted">Агент перевозчика</h6>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-truck"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <p class="mb-0"><strong>{{ bid.carrier_agent.get_full_name|default:bid.carrier_agent.username }}</strong></p>
+                                        <small class="text-muted">Отправил предложение {{ bid.created_at|date:"d.m.Y" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Действия -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h2 class="h5 mb-0">Действия</h2>
+                        </div>
+                        <div class="card-body">
+                            {% if can_accept %}
+                            <form method="post" action="{% url 'accept_bid' bid.id %}" class="mb-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success w-100" onclick="return confirm('Вы уверены, что хотите принять это предложение? После принятия другие предложения будут отклонены.')">
+                                    <i class="bi bi-check-circle"></i> Принять предложение
+                                </button>
+                            </form>
+                            {% endif %}
+                            
+                            {% if can_reject %}
+                            <form method="post" action="{% url 'reject_bid' bid.id %}" class="mb-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Вы уверены, что хотите отклонить это предложение?')">
+                                    <i class="bi bi-x-circle"></i> Отклонить предложение
+                                </button>
+                            </form>
+                            {% endif %}
+                            
+                            {% if can_cancel %}
+                            <form method="post" action="{% url 'cancel_bid' bid.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Вы уверены, что хотите отменить это предложение?')">
+                                    <i class="bi bi-backspace"></i> Отменить предложение
+                                </button>
+                            </form>
+                            {% endif %}
+                            
+                            <a href="{% url 'shipment_detail' bid.shipment.id %}" class="btn btn-outline-secondary w-100 mt-2">
+                                <i class="bi bi-arrow-left"></i> К заявке
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Статус -->
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h2 class="h5 mb-0">Статус</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Заявка:</span>
+                                <span class="badge bg-{% if bid.shipment.status == 'active' %}success{% elif bid.shipment.status == 'in_progress' %}info{% else %}secondary{% endif %}">
+                                    {{ bid.shipment.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Предложение:</span>
+                                <span class="badge bg-{% if bid.status == 'pending' %}warning{% elif bid.status == 'accepted' %}success{% elif bid.status == 'rejected' %}danger{% else %}secondary{% endif %}">
+                                    {{ bid.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

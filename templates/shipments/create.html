@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Создание заявки - AirCargo</title>
+</head>
+<body>
+    <h1>📝 Создание заявки на перевозку</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <label>Город вылета:</label>
+            <input type="text" name="departure_city" required>
+        </div>
+        <div>
+            <label>Город прилета:</label>
+            <input type="text" name="arrival_city" required>
+        </div>
+        <div>
+            <label>Вес (кг):</label>
+            <input type="number" name="weight" step="0.01" required>
+        </div>
+        <div>
+            <label>Объем (м³):</label>
+            <input type="number" name="volume" step="0.01" required>
+        </div>
+        <button type="submit">Создать заявку</button>
+    </form>
+    <a href="/shipments/">← Назад к списку</a>
+</body>
+</html>

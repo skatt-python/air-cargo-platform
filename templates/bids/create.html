@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Создание предложения - AirCargo{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h3 class="mb-0">💰 Создание предложения</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Заявка на перевозку:</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <p><strong>Маршрут:</strong> {{ shipment.departure_city }} → {{ shipment.arrival_city }}</p>
+                                <p><strong>Вес:</strong> {{ shipment.weight }} кг</p>
+                                <p><strong>Объем:</strong> {{ shipment.volume }} м³</p>
+                                <p><strong>Заказчик:</strong> {{ shipment.customer.profile.company_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.price.label }}</label>
+                            <div class="input-group">
+                                {{ form.price }}
+                                <span class="input-group-text">руб.</span>
+                            </div>
+                            {% if form.price.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.price.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.comment.label }}</label>
+                            {{ form.comment }}
+                            {% if form.comment.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.comment.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                📤 Отправить предложение
+                            </button>
+                            <a href="{% url 'shipment_detail' shipment.id %}" class="btn btn-secondary">
+                                ← Назад к заявке
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

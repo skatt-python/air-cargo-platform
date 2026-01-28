@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход - AirCargo{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow border-0">
+                <div class="card-header bg-success text-white py-4">
+                    <h2 class="text-center mb-0">🔐 Вход в AirCargo</h2>
+                    <p class="text-center mb-0 opacity-75">Добро пожаловать обратно!</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">
+                                <i class="bi bi-envelope me-2"></i>Email
+                            </label>
+                            {{ form.username }}
+                        </div>
+
+                        <!-- Пароль -->
+                        <div class="mb-4">
+                            <label for="{{ form.password.id_for_label }}" class="form-label">
+                                <i class="bi bi-key me-2"></i>Пароль
+                            </label>
+                            {{ form.password }}
+                        </div>
+
+                        <!-- Запомнить меня -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Запомнить меня</label>
+                        </div>
+
+                        <!-- Кнопка входа -->
+                        <div class="d-grid gap-2 mb-3">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+                            </button>
+                        </div>
+
+                        <!-- Ссылка на восстановление пароля -->
+                        <div class="text-center mb-4">
+                            <a href="#" class="text-decoration-none">Забыли пароль?</a>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-2">Нет аккаунта?</p>
+                        <a href="{% url 'register' %}" class="btn btn-outline-success">
+                            <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

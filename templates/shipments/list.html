@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список грузов - AirCargo</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .shipment { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>📦 Список грузов для перевозки</h1>
+    <a href="/shipments/create/">➕ Создать заявку</a>
+    <a href="/" style="margin-left: 10px;">🏠 Главная</a>
+    
+    <div>
+        {% for shipment in shipments %}
+        <div class="shipment">
+            <h3>{{ shipment.departure_city }} → {{ shipment.arrival_city }}</h3>
+            <p>Вес: {{ shipment.weight }} кг | Объем: {{ shipment.volume }} м³</p>
+            <p>Статус: {{ shipment.get_status_display }}</p>
+            <a href="/shipments/{{ shipment.id }}/">Подробнее</a>
+        </div>
+        {% empty %}
+        <p>Пока нет заявок на перевозку.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

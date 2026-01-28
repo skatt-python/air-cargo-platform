@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block title %}Личный кабинет - AirCargo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Заголовок с приветствием -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card bg-light border-0">
+                <div class="card-body py-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="display-6 mb-2">
+                                👋 Добро пожаловать, {{ user.company_name }}!
+                            </h1>
+                            <p class="lead mb-0">
+                                <span class="badge bg-{% if user.user_type == 'customer' %}primary{% elif user.user_type == 'agent' %}success{% else %}info{% endif %}">
+                                    {{ user.get_user_type_display }}
+                                </span>
+                                <span class="ms-3 text-muted">{{ user.email }}</span>
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <a href="{% url 'profile' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-gear me-2"></i>Настройки
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика в зависимости от типа пользователя -->
+    <div class="row mb-4">
+        {% if user.user_type == 'customer' %}
+            <!-- Панель грузовладельца -->
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-primary h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Активные заявки</h6>
+                                <h2 class="display-6">0</h2>
+                            </div>
+                            <i class="bi bi-clipboard-check display-6 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-success h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Выполнено</h6>
+                                <h2 class="display-6">0</h2>
+                            </div>
+                            <i class="bi bi-check-circle display-6 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-info h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Ожидает предложений</h6>
+                                <h2 class="display-6">0</h2>
+                            </div>
+                            <i class="bi bi-clock-history display-6 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопка создания заявки -->
+            <div class="col-12 mb-4">
+                <div class="d-grid">
+                    <a href="{% url 'create_shipment' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>Создать новую заявку
+                    </a>
+                </div>
+            </div>
+
+        {% elif user.user_type == 'agent' %}
+            <!-- Панель агента -->
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-warning h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Активные предложения</h6>
+                                <h2 class="display-6">0</h2>
+                            </div>
+                            <i class="bi bi-hourglass-split display-6 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-success h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Принято</h6>
+                                <h2 class="display-6">0</h2>
+                            </div>
+                            <i class="bi bi-check-all display-6 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-info h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Доступных заявок</h6>
+                                <h2 class="display-6">{{ available_shipments|default:"0" }}</h2>
+                            </div>
+                            <i class="bi bi-box display-6 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопка просмотра заявок -->
+            <div class="col-12 mb-4">
+                <div class="d-grid">
+                    <a href="{% url 'shipment_list' %}" class="btn btn-success btn-lg">
+                        <i class="bi bi-search me-2"></i>Найти заявки для предложения
+                    </a>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Панель разработчика -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">👨‍💻 Панель разработчика</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Добро пожаловать в режим разработчика. У вас есть доступ к API и документации.</p>
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn btn-outline-info">API Documentation</a>
+                            <a href="#" class="btn btn-outline-secondary">Technical Support</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Последние активности -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Последние активности
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if user.user_type == 'customer' and shipments %}
+                        <div class="list-group">
+                            {% for shipment in shipments %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ shipment.departure_city }} → {{ shipment.arrival_city }}</h6>
+                                        <small>{{ shipment.created_at|timesince }} назад</small>
+                                    </div>
+                                    <p class="mb-1">Вес: {{ shipment.weight }} кг | Объем: {{ shipment.volume }} м³</p>
+                                    <small>
+                                        Статус:
+                                        <span class="badge bg-{% if shipment.status == 'pending' %}warning{% elif shipment.status == 'assigned' %}success{% else %}secondary{% endif %}">
+                                            {{ shipment.get_status_display }}
+                                        </span>
+                                    </small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif user.user_type == 'agent' and bids %}
+                        <div class="list-group">
+                            {% for bid in bids %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Предложение на {{ bid.shipment.departure_city }} → {{ bid.shipment.arrival_city }}</h6>
+                                        <small>{{ bid.created_at|timesince }} назад</small>
+                                    </div>
+                                    <p class="mb-1">Цена: {{ bid.price }} руб.</p>
+                                    <small>
+                                        Статус:
+                                        <span class="badge bg-{% if bid.status == 'pending' %}warning{% elif bid.status == 'accepted' %}success{% elif bid.status == 'rejected' %}danger{% else %}secondary{% endif %}">
+                                            {{ bid.get_status_display }}
+                                        </span>
+                                    </small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center mb-0">Активностей пока нет.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
